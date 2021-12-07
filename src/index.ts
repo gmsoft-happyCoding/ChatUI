@@ -130,3 +130,6 @@ export type { GoodsProps } from './components/Goods';
 
 export { Chat as default } from './components/Chat';
 export type { ChatProps } from './components/Chat';
+
+export { SendConfirm } from './components/SendConfirm';
+export type { SendConfirmProps } from './components/SendConfirm/SendConfirm';
