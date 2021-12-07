@@ -1,4 +1,11 @@
-import React, { useState, useRef, useEffect, useImperativeHandle, useCallback } from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useImperativeHandle,
+  useCallback,
+  useMemo,
+} from 'react';
 import clsx from 'clsx';
 import { IconButtonProps } from '../IconButton';
 import { Recorder, RecorderProps } from '../Recorder';
@@ -242,6 +249,8 @@ export const Composer = React.forwardRef<ComposerHandle, ComposerProps>((props, 
     onImageSend,
   };
 
+  const hasText = useMemo(() => text && text.trim(), [text]);
+
   if (isWide) {
     return (
       <div className="Composer Composer--lg" ref={composerRef}>
@@ -261,7 +270,7 @@ export const Composer = React.forwardRef<ComposerHandle, ComposerProps>((props, 
         <div className="Composer-inputWrap">
           <ComposerInput invisible={false} {...inputProps} />
         </div>
-        <SendButton onClick={handleSendBtnClick} disabled={!text} />
+        <SendButton onClick={handleSendBtnClick} disabled={!hasText} />
       </div>
     );
   }
@@ -282,7 +291,7 @@ export const Composer = React.forwardRef<ComposerHandle, ComposerProps>((props, 
           <ComposerInput invisible={!isInputText} {...inputProps} />
           {!isInputText && <Recorder {...recorder} />}
         </div>
-        {!text && rightAction && <Action {...rightAction} />}
+        {!hasText && rightAction && <Action {...rightAction} />}
         {hasToolbar && (
           <Action
             className={clsx('Composer-toggleBtn', {
@@ -293,7 +302,7 @@ export const Composer = React.forwardRef<ComposerHandle, ComposerProps>((props, 
             aria-label={isAccessoryOpen ? '关闭工具栏' : '展开工具栏'}
           />
         )}
-        {text && <SendButton onClick={handleSendBtnClick} disabled={false} />}
+        {hasText && <SendButton onClick={handleSendBtnClick} disabled={false} />}
       </div>
       {isAccessoryOpen && (
         <AccessoryWrap onClickOutside={handleAccessoryBlur}>
