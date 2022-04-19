@@ -26,7 +26,7 @@ export interface MessageProps {
   /**
    * 消息内容
    */
-  content?: any;
+  content: any;
   /**
    * 消息创建时间
    */
@@ -47,6 +47,21 @@ export interface MessageProps {
    * 状态
    */
   status?: IMessageStatus;
+  /**
+   * 发送场景
+   */
+  scene: 'p2p' | 'team';
+  /**
+   * 发送人
+   */
+  from?: {
+    id: string;
+    name?: string;
+  };
+  /**
+   * 发送给
+   */
+  to: string;
   /**
    * 消息内容渲染函数
    */

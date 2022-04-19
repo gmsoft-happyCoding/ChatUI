@@ -22,7 +22,7 @@ const makeMsg = (msg: MessageWithoutId, id?: MessageId) => {
 
   return {
     ...msg,
-    _id: msg._id || id || getRandomString(),
+    _id: id || msg._id || getRandomString(),
     createdAt: ts,
     position: msg.position || 'left',
     hasTime,
@@ -41,7 +41,16 @@ export default function useMessages(initialState: MessageWithoutId[] = []) {
   }, []);
 
   const updateMsg = useCallback((id: MessageId, msg: MessageWithoutId) => {
-    setMessages((prev) => prev.map((t) => (t._id === id ? makeMsg(msg, id) : t)));
+    setMessages((prev) => {
+      const unSortedmessages = prev.map((t) => (t._id === id ? makeMsg(msg, id) : t));
+      /**
+       * 更新之后, 发送消息的时间顺序可能会被打乱, 重新排序
+       */
+      return unSortedmessages.sort((a, b) => {
+        if (a.createdAt && b.createdAt) return a.createdAt - b.createdAt;
+        return 0;
+      });
+    });
   }, []);
 
   const appendMsg = useCallback(
@@ -71,8 +80,11 @@ export default function useMessages(initialState: MessageWithoutId[] = []) {
 
       if (typing) {
         appendMsg({
+          scene: 'p2p',
+          to: '',
           _id: TYPING_ID,
           type: 'typing',
+          content: {},
         });
       } else {
         deleteMsg(TYPING_ID);
