@@ -31,25 +31,39 @@ const makeMsg = (msg: MessageWithoutId, id?: MessageId) => {
 
 const TYPING_ID = '_TYPING_';
 
+function uniqById(massages: Messages) {
+  const seen = new Map();
+  return massages.filter((item) => {
+    const key = item._id;
+    if (!seen.has(key)) {
+      seen.set(key, true);
+      return true;
+    }
+    return false;
+  });
+}
+
 export default function useMessages(initialState: MessageWithoutId[] = []) {
   const initialMsgs: Messages = useMemo(() => initialState.map((t) => makeMsg(t)), [initialState]);
   const [messages, setMessages] = useState(initialMsgs);
   const isTypingRef = useRef(false);
 
   const prependMsgs = useCallback((msgs: Messages) => {
-    setMessages((prev: Messages) => [...msgs, ...prev]);
+    setMessages((prev: Messages) => uniqById([...msgs, ...prev]));
   }, []);
 
   const updateMsg = useCallback((id: MessageId, msg: MessageWithoutId) => {
     setMessages((prev) => {
-      const unSortedmessages = prev.map((t) => (t._id === id ? makeMsg(msg, id) : t));
+      const unSortedMessages = prev.map((t) => (t._id === id ? makeMsg(msg, id) : t));
       /**
        * 更新之后, 发送消息的时间顺序可能会被打乱, 重新排序
        */
-      return unSortedmessages.sort((a, b) => {
-        if (a.createdAt && b.createdAt) return a.createdAt - b.createdAt;
-        return 0;
-      });
+      return uniqById(
+        unSortedMessages.sort((a, b) => {
+          if (a.createdAt && b.createdAt) return a.createdAt - b.createdAt;
+          return 0;
+        }),
+      );
     });
   }, []);
 
@@ -60,18 +74,18 @@ export default function useMessages(initialState: MessageWithoutId[] = []) {
         isTypingRef.current = false;
         updateMsg(TYPING_ID, newMsg);
       } else {
-        setMessages((prev) => [...prev, newMsg]);
+        setMessages((prev) => uniqById([...prev, newMsg]));
       }
     },
     [updateMsg],
   );
 
   const deleteMsg = useCallback((id: MessageId) => {
-    setMessages((prev) => prev.filter((t) => t._id !== id));
+    setMessages((prev) => uniqById(prev.filter((t) => t._id !== id)));
   }, []);
 
   const resetList = useCallback((list = []) => {
-    setMessages(list);
+    setMessages(uniqById(list));
   }, []);
 
   const setTyping = useCallback(
