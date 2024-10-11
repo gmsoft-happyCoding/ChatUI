@@ -67,6 +67,22 @@ export default function useMessages(initialState: MessageWithoutId[] = []) {
     });
   }, []);
 
+  /**
+   * 在消息列表后面添加消息
+   */
+  const appendMsgs = useCallback((msgs: Messages) => {
+    setMessages((prev: Messages) => {
+      const unSortedMessages = uniqById([...prev, ...msgs]);
+      /**
+       * 根据时间重新排序
+       */
+      return unSortedMessages.sort((a, b) => {
+        if (a.createdAt && b.createdAt) return a.createdAt - b.createdAt;
+        return 0;
+      });
+    });
+  }, []);
+
   const appendMsg = useCallback(
     (msg: MessageWithoutId) => {
       const newMsg = makeMsg(msg);
@@ -111,6 +127,7 @@ export default function useMessages(initialState: MessageWithoutId[] = []) {
   return {
     messages,
     prependMsgs,
+    appendMsgs,
     appendMsg,
     updateMsg,
     deleteMsg,
